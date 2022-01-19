@@ -1,0 +1,6 @@
+kubectl create rolebinding default-view   --clusterrole=view   --serviceaccount=gitlab-as:default   --namespace=default
+kubectl create clusterrolebinding add-on-cluster-admin   --clusterrole=cluster-admin   --serviceaccount=gitlab-runner-gitlab-runner:default
+
+kubectl create secret docker-registry image-pull-secret   --namespace default   --docker-server="exampleacr.azurecr.io"   --docker-username="exampleACR"   --docker-password="oiqrArU11prcxFPqsE+aV9ZNfaFCFnxF"
+
+kubectl create secret docker-registry acr-secret   --docker-server=exampleacr.azurecr.io   --docker-username=exampleACR   --docker-password=oiqrArU11prcxFPqsE+aV9ZNfaFCFnxF  --docker-email=mehran.hafizi@email.com

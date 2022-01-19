@@ -1,0 +1,72 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: elasticsearch
+spec:
+  version: 7.16.2
+  nodeSets:
+  - name: default
+    count: 3
+    config:
+      node.store.allow_mmap: false
+  http:
+   tls:
+    selfSignedCertificate:
+        disabled: true         
+---
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: kibana
+spec:
+  version: 7.16.2
+  count: 1
+  elasticsearchRef:
+    name: elasticsearch
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true       
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kibana-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+spec:
+ tls:
+  - secretName: kibana-tls
+    hosts: 
+    - kibana.dev.arosuite.com
+ rules:
+ - host: kibana.dev.arosuite.com
+   http:
+     paths:
+     - path: /
+       backend:
+         serviceName: kibana-kb-http
+         servicePort: 5601
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: elastic-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/issuer: "letsencrypt-prod"
+spec:
+ tls:
+  - secretName: elastic-tls
+    hosts: 
+    - elastic.dev.arosuite.com
+ rules:
+ - host: elastic.dev.arosuite.com
+   http:
+     paths:
+     - path: /
+       backend:
+         serviceName: elasticsearch-es-http
+         servicePort: 9200
